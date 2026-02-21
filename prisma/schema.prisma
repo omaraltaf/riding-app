@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GlobalRole {
+  ADMIN
+  USER
+}
+
+enum OrganizerRequestStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RideRole {
+  ORGANIZER
+  MEMBER
+}
+
+model User {
+  id                     String                 @id @default(cuid())
+  name                   String?
+  email                  String                 @unique
+  password               String
+  role                   GlobalRole             @default(USER)
+  image                  String?
+  bio                    String?
+  location               String?
+  phone                  String?
+  bike                   String?
+  canOrganize            Boolean                @default(false)
+  organizerRequestStatus OrganizerRequestStatus @default(NONE)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  rides                  RideParticipant[]
+}
+
+model Ride {
+  id            String            @id @default(cuid())
+  title         String
+  description   String
+  date          DateTime
+  startLocation String
+  endLocation   String
+  visibility    Boolean           @default(true) // true for public, false for private
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  participants  RideParticipant[]
+  itinerary     ItineraryStop[]
+}
+
+model RideParticipant {
+  id        String   @id @default(cuid())
+  userId    String
+  rideId    String
+  role      RideRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  ride      Ride     @relation(fields: [rideId], references: [id])
+
+  @@unique([userId, rideId])
+}
+
+model ItineraryStop {
+  id          String   @id @default(cuid())
+  rideId      String
+  title       String
+  description String?
+  plannedTime DateTime
+  order       Int
+  ride        Ride     @relation(fields: [rideId], references: [id])
+}

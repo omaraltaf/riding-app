@@ -4,7 +4,16 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  const createRideHref = session ? "/rides/create" : "/login?callbackUrl=/rides/create";
+  let createRideHref = "/login?callbackUrl=/rides/create";
+
+  if (session) {
+    const user = session.user as any;
+    if (user.canOrganize || user.role === 'ADMIN') {
+      createRideHref = "/rides/create";
+    } else {
+      createRideHref = "/profile";
+    }
+  }
 
   return (
     <div style={{ paddingTop: '4rem', paddingBottom: '8rem' }}>

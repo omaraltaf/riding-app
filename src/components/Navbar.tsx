@@ -18,7 +18,7 @@ export default function Navbar() {
                 {session?.user && (
                     <Link href="/profile">Profile</Link>
                 )}
-                {session?.user?.role === 'ADMIN' && (
+                {(session?.user as any)?.role === 'ADMIN' && (
                     <Link href="/admin" style={{ color: 'var(--accent)' }}>Admin</Link>
                 )}
             </div>
